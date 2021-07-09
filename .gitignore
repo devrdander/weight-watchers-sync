@@ -36,3 +36,5 @@ tests/fixtures/vcr_cassettes/*.yaml
 .cache
 auth.json
 *.sqlite3
+sqlite.db
+start.sh

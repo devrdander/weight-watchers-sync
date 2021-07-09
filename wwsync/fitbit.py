@@ -29,7 +29,11 @@ def _do_auth(url, client_id, secret):
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': 'Basic {}'.format(token),
     }
-    r = requests.post(url, headers=headers)
+    body = {
+        'grant_type': 'authorization_code',
+        'client_id': client_id
+    }
+    r = requests.post(url, headers=headers, data=body)
     if r.status_code != 200:
         print("Auth Failed: {}".format(r.text))
         sys.exit(1)
