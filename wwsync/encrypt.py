@@ -2,7 +2,8 @@ import os
 
 from cryptography.fernet import Fernet
 
-CIPHER_SUITE = Fernet(bytes(os.environ['WW_SYNC_ENCRYPTION_KEY'], 'utf-8'))
+CIPHER_SUITE = Fernet(os.environ['WW_SYNC_ENCRYPTION_KEY'])
+
 
 def encrypt(msg):
     return CIPHER_SUITE.encrypt(msg)

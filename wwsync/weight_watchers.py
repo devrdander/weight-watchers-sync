@@ -11,12 +11,12 @@ import requests
 from bs4 import BeautifulSoup
 
 WW_HOME_PAGE = "https://cmx.weightwatchers.com"
-WW_LOGIN_URL = 'https://auth.weightwatchers.com/v2/login/'
-WW_JOURNAL_URL = '{host}/api/v3/cmx/members/~/trackedFoods/{date}'
-FOOD_URL = '{host}/api/v3/public/foods/{food_id}/{version_id}'
-RECIPE_URL = '{host}/api/v3/public/recipes/{food_id}/{version_id}?fullDetails=true'
-MEMBER_FOOD_URL = '{host}/api/v3/cmx/members/~/custom-foods/foods/{food_id}/{version_id}?fullDetails=true'
-MEMBER_RECIPE_URL = '{host}/api/v3/cmx/members/~/custom-foods/recipes/{food_id}/{version_id}?fullDetails=true'
+WW_LOGIN_URL = 'https://login.weightwatchers.com/classic/UI/Login'
+WW_JOURNAL_URL = '{host}/api/v2/cmx/members/~/trackedFoods/{date}'
+FOOD_URL = '{host}/api/v2/public/foods/{food_id}/{version_id}'
+RECIPE_URL = '{host}/api/v2/public/recipes/{food_id}/{version_id}?fullDetails=true'
+MEMBER_FOOD_URL = '{host}/api/v2/cmx/members/~/custom-foods/foods/{food_id}/{version_id}?fullDetails=true'
+MEMBER_RECIPE_URL = '{host}/api/v2/cmx/members/~/custom-foods/recipes/{food_id}/{version_id}?fullDetails=true'
 
 WW_FOOD = 'WWFOOD'
 MEMBER_FOOD = 'MEMBERFOOD'
@@ -84,16 +84,19 @@ def login(username, password, session):
     """
     logging.info("Logging into weight watchers")
     initial_url = '{}{}'.format(WW_LOGIN_URL, '?realm=US&service=ldapService&goto=http%3a%2f%2fcmx.weightwatchers.com')
-    session.headers.setdefault('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0')
+    session.headers.setdefault('user-agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) '
+                                             'AppleWebKit/537.36 (KHTML, like Gecko) '
+                                             'Chrome/48.0.2564.109 Safari/537.36')
     response = session.get(initial_url)  # set headers cookies etc
     soup = BeautifulSoup(response.text, 'html.parser')
     login_parameters = {
-            "username": username,
-            "password": password,
-            "rememberMe": False,
-            "usernameEncoded": False,
-            "retry": False
-        }
+        x.get('name'): x.get('value')
+        for x in soup.find_all('input')
+        if x.get('name') != 'Login.Submit'
+    }
+    login_parameters['IDToken1'] = username
+    login_parameters['IDToken2'] = password
+    login_parameters['pcookie'] = 'on'
     response = session.post(
         WW_LOGIN_URL,
         data=login_parameters,
